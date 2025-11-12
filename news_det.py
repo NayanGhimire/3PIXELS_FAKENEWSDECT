@@ -62,3 +62,32 @@ def train_model():
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_test_tfidf = vectorizer.transform(X_test)
     print(" Training model...")
+    model = LogisticRegression(
+        max_iter=500,  
+        C=1.0,
+        solver='saga', 
+        n_jobs=-1, 
+        random_state=42
+    )
+    model.fit(X_train_tfidf, y_train)
+    y_pred = model.predict(X_test_tfidf)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"\n✅ Model trained successfully!")
+    print(f"🎯 Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
+    print(f"📊 Training samples: {len(X_train)}, Test samples: {len(X_test)}")
+def predict_news(news_text):
+    """Predict if news is real or fake"""
+    if model is None or vectorizer is None:
+        return {"prediction": "Error", "confidence": 0, "error": "Model not trained"}
+    try:
+        processed_text = preprocess_text(news_text)
+        vec = vectorizer.transform([processed_text])
+        prediction = model.predict(vec)
+        probability = model.predict_proba(vec)[0]
+        
+        return {
+            'prediction': "Real" if prediction[0] == 1 else "Fake",
+            'confidence': float(max(probability)) * 100
+        }
+    except Exception as e:
+        return {"prediction": "Error", "confidence": 0, "error": str(e)}
