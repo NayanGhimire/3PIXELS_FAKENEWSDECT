@@ -9,7 +9,7 @@ from flask import Flask, render_template_string, request, jsonify
 import re
 app = Flask(__name__)
 # Paths to your folders
-true_folder = 'C:/Users/Microa/OneDrive/Desktop/project/rfactual'
+true_folder = 'C:/Users/Micro/OneDrive/Desktop/project/rfactual'
 false_folder = 'C:/Users/Micro/OneDrive/Desktop/project/arfake'
 model = None
 vectorizer = None
