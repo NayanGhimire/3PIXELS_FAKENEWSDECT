@@ -9,20 +9,18 @@ from flask import Flask, render_template_string, request, jsonify
 import re
 app = Flask(__name__)
 # Paths to your folders
-true_folder = 'C:/Users/Micro/OneDrive/Desktop/project/rfactual'
+true_folder = 'C:/Users/Microa/OneDrive/Desktop/project/rfactual'
 false_folder = 'C:/Users/Micro/OneDrive/Desktop/project/arfake'
 model = None
 vectorizer = None
 accuracy = None
 def preprocess_text(text):
-    """Fast text preprocessing"""
     text = str(text).lower()
     text = re.sub(r'http\S+|www\S+', '', text)
     text = re.sub(r'[^a-zA-Z\s]', '', text)
     text = ' '.join(text.split())
     return text
 def load_folder(folder_path, label):
-    """Load CSV files - with row limit for speed"""
     data_list = []
     for filename in os.listdir(folder_path):
         if filename.endswith('.csv'):
@@ -36,10 +34,31 @@ def load_folder(folder_path, label):
         return pd.concat(data_list, ignore_index=True)
     return pd.DataFrame()
 def train_model():
-    """Train optimized model for speed"""
     global model, vectorizer, accuracy
     print(" Loading data...")
     true_data = load_folder(true_folder, 1)
     false_data = load_folder(false_folder, 0)
     data = pd.concat([true_data, false_data], ignore_index=True)
-    
+    if len(data) > 10000:
+        data = data.sample(n=10000, random_state=42)
+        print(f"⚡ Sampled to {len(data)} rows for faster training")
+    print("🧹 Preprocessing text...")
+    data['text'] = data['text'].apply(preprocess_text)
+    X = data['text']
+    y = data['label']
+    print(" Splitting data")
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+    print("🔢 Vectorizing text...")
+    vectorizer = TfidfVectorizer(
+        stop_words='english',
+        max_df=0.7,
+        min_df=2,
+        ngram_range=(1, 2), 
+        max_features=5000,
+        sublinear_tf=True
+    )
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+    print(" Training model...")
