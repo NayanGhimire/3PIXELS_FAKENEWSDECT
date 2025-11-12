@@ -84,7 +84,6 @@ def predict_news(news_text):
         vec = vectorizer.transform([processed_text])
         prediction = model.predict(vec)
         probability = model.predict_proba(vec)[0]
-        
         return {
             'prediction': "Real" if prediction[0] == 1 else "Fake",
             'confidence': float(max(probability)) * 100
