@@ -1,7 +1,7 @@
 # News Detector (news_det.py)
 
-Small Flask-based prototype that trains a simple text classifier to detect news categories (or binary news detection) using TF-IDF features and logistic regression. The main script is `main.py`.
-
+Small Flask-based prototype that trains a simple text classifier to detect news categories (or binary news detection) using TF-IDF features and logistic regression. The main script is `news_det.py`.
+#THE ALL DATA IN DATA SETS ARE FROM KAGGLE 
 ## What this file does
 - Loads and preprocesses text data (CSV/TSV or pandas-readable formats).
 - Converts raw text into TF-IDF features.
