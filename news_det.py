@@ -7,10 +7,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from flask import Flask, render_template_string, request, jsonify
 import re
+import requests
 app = Flask(__name__)
-# Paths to your folders
-true_folder = 'C:/Users/Micro/OneDrive/Desktop/project/rfactual'
-false_folder = 'C:/Users/Micro/OneDrive/Desktop/project/arfake'
+true_folder = 'C:/Users/Micro/OneDrive/Desktop/project/rfactual'#MAKE A FOLDER AND USE YOUR OWN PATH
+false_folder = 'C:/Users/Micro/OneDrive/Desktop/project/arfake' #MAKE A FOLDER AND USE YOUR OWN PATH 
 model = None
 vectorizer = None
 accuracy = None
@@ -29,7 +29,7 @@ def load_folder(folder_path, label):
                 df['label'] = label
                 data_list.append(df)
             except Exception as e:
-                print(f"Skipping {filename}: {e}")  
+                print(f"Skipping {filename}: {e}")
     if data_list:
         return pd.concat(data_list, ignore_index=True)
     return pd.DataFrame()
@@ -37,8 +37,8 @@ def train_model():
     global model, vectorizer, accuracy
     print(" Loading data...")
     true_data = load_folder(true_folder, 1)
-    false_data = load_folder(false_folder, 0)
-    data = pd.concat([true_data, false_data], ignore_index=True)
+    false_data = load_folder(false_folder, 0) 
+    data = pd.concat([true_data, false_data], ignore_index=True) 
     if len(data) > 10000:
         data = data.sample(n=10000, random_state=42)
         print(f"⚡ Sampled to {len(data)} rows for faster training")
@@ -46,11 +46,11 @@ def train_model():
     data['text'] = data['text'].apply(preprocess_text)
     X = data['text']
     y = data['label']
-    print(" Splitting data")
+    print("✂️ Splitting data...")
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
-    print("Vectorizing text...")
+    print("🔢 Vectorizing text...")
     vectorizer = TfidfVectorizer(
         stop_words='english',
         max_df=0.7,
@@ -61,22 +61,21 @@ def train_model():
     )
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_test_tfidf = vectorizer.transform(X_test)
-    print(" Training model...")
+    print("🤖 Training model...")
     model = LogisticRegression(
-        max_iter=500,  
+        max_iter=500, 
         C=1.0,
         solver='saga', 
-        n_jobs=-1, 
+        n_jobs=-1,  
         random_state=42
     )
     model.fit(X_train_tfidf, y_train)
     y_pred = model.predict(X_test_tfidf)
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"\n✅ Model trained successfully!")
-    print(f"🎯 Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
-    print(f"📊 Training samples: {len(X_train)}, Test samples: {len(X_test)}")
+    print(f"\n Model trained successfully!")
+    print(f" Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
+    print(f" Training samples: {len(X_train)}, Test samples: {len(X_test)}")
 def predict_news(news_text):
-    """Predict if news is real or fake"""
     if model is None or vectorizer is None:
         return {"prediction": "Error", "confidence": 0, "error": "Model not trained"}
     try:
